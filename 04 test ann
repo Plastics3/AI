@@ -1,0 +1,65 @@
+import time
+import numpy as np
+import h5py
+import matplotlib.pyplot as plt
+from numpy.random import rand
+import scipy
+from PIL import Image
+from scipy import ndimage
+from unit10 import c1w4_utils as u10
+from DL2 import *
+
+
+plt.rcParams['figure.figsize'] = (5.0, 4.0)
+plt.rcParams['image.interpolation'] = 'nearest'
+plt.rcParams['image.cmap'] = 'gray'
+np.random.seed(1)
+
+train_x_orig, train_y, test_x_orig, test_y, classes = u10.load_datasetC1W4()
+index = 87
+#1
+m_train = train_x_orig.shape[0]
+num_px = train_x_orig.shape[1]
+m_test = test_x_orig.shape[0]
+
+#2
+train_x_flatten = train_x_orig.reshape(m_train,-1).T
+test_x_flatten = test_x_orig.reshape(m_test,-1).T
+
+train_x = train_x_flatten / 255 -0.5
+test_x = test_x_flatten / 255 -0.5
+
+#3
+#shalow network
+#model = DLModel()
+#layer1 = DLLayer("1",7, (train_x.shape[0],),learning_rate=0.07, W_initialization="xaviar")
+#layer2 = DLLayer("2",1, (7,),activation="sigmoid",learning_rate=0.07, W_initialization="xaviar")
+#model.add(layer1)
+#model.add(layer2)
+#model.compile("cross_entropy")
+
+#4
+model = DLModel()
+layer1 = DLLayer("1",30, (train_x.shape[0],),learning_rate=0.075, W_initialization="xaviar",random_scale=10)
+layer2 = DLLayer("2",15, (30,),learning_rate=0.075, W_initialization="xaviar",random_scale=10)
+layer3 = DLLayer("3",10, (15,),learning_rate=0.075, W_initialization="xaviar",random_scale=10)
+layer4 = DLLayer("4",10, (10,),learning_rate=0.075, W_initialization="xaviar",random_scale=10)
+layer5 = DLLayer("5",5, (10,),learning_rate=0.075, W_initialization="xaviar",random_scale=10)
+layer6 = DLLayer("6",1, (5,),learning_rate=0.075,activation="sigmoid", W_initialization="xaviar",random_scale=10)
+
+model.add(layer1)
+model.add(layer2)
+model.add(layer3)
+model.add(layer4)
+model.add(layer5)
+model.add(layer6)
+model.compile("cross_entropy")
+
+costs = model.train(train_x, train_y,2500)
+plt.plot(np.squeeze(costs))
+plt.ylabel('cost')
+plt.xlabel('iterations (per 25s)')
+plt.title("Learning rate =" + str(0.007))
+plt.show()
+print("train accuracy:", np.mean(model.predict(train_x) == train_y))
+print("test accuracy:", np.mean(model.predict(test_x) == test_y))
